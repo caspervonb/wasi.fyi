@@ -13,7 +13,7 @@ async function handleRequest(request) {
     return handleRaw(request);
   }
 
-  return handleNotFound(request);
+  return handleView(request);
 }
 
 async function handleIndex(request) {
@@ -51,6 +51,72 @@ async function handleIndex(request) {
         ${reports.map(summarize)}
       </body>
     </html>
+  `;
+
+  return new Response(html, {
+    status: 404,
+    headers: { "content-type": "text/html" },
+  });
+}
+
+async function handleView(request) {
+  const { pathname } = new URL(request.url);
+
+  const report = await fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${pathname}.json`).then(x => x.json());
+
+  const modifiers = (result) => {
+    if (result.status == "PASS") {
+      return "is-success";
+    }
+
+    return "is-failure";
+  };
+
+  const view = ({ results }) => {
+    return results.map((result) => {
+      if (result.status == "PASS") {
+        return `
+        <li class="box">
+          <span class="icon-text has-text-success">
+            <span class="icon">
+              <i class="fas fa-check-square"></i>
+            </span>
+            <span>${result.name}</span>
+          </span>
+        </li>
+        `;
+      }
+
+      return `
+      <li class="box">
+        <span class="icon-text has-text-danger">
+          <span class="icon">
+            <i class="fas fa-ban"></i>
+          </span>
+          <span>${result.name}</span>
+        </span>
+        <div><pre class="block">${result.message}</pre></div>
+      </li>
+      `;
+    }).join("\n");
+  };
+
+  const html = `
+    <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+      </head>
+      <body class="container is-max-desktop">
+        <header class="section">
+          <h1 class="title">WebAssembly System Interface Test Suite Results</h1>
+        </header>
+
+        <ul>${view(report)}</ul>
+      </body>
+    </html>
+
   `;
 
   return new Response(html, {
