@@ -96,7 +96,7 @@ async function handleView(request) {
           </span>
           <span>${result.name}</span>
         </span>
-        <div><pre class="block">${result.message}</pre></div>
+        <div><pre class="block">${escape(result.message)}</pre></div>
       </li>
       `;
     }).join("\n");
@@ -146,3 +146,12 @@ async function handleNotFound(request) {
     headers: { "content-type": "text/html" },
   });
 }
+
+function escape(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
