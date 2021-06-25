@@ -29,18 +29,25 @@ async function handleIndex(request) {
     };
 
     return `
-      <section>
+      <section class="section card">
         <p>Ran ${summary.total} tests with ${runtime.name} (v${runtime.version})</p>
         <p>${summary.passed} / ${summary.total} test cases pass.</p>
-        <progress value="${summary.passed}" max="${summary.total}">
+        <progress class="progress is-small is-success has-background-danger" value="${summary.passed}" max="${summary.total}">
       </section>
     `;
   };
 
   const html = `
     <html>
-      <head></head>
-      <body>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+      </head>
+      <body class="container is-max-desktop">
+        <header class="section">
+          <h1 class="title">WebAssembly System Interface Test Suite Results</h1>
+        </header>
+
         ${reports.map(summarize)}
       </body>
     </html>
