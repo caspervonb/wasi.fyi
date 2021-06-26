@@ -1,5 +1,5 @@
-addEventListener("fetch", async function(event) {
-  event.respondWith(await handleRequest(event.request));
+addEventListener("fetch", function(event) {
+  event.respondWith(handleRequest(event.request));
 });
 
 async function handleRequest(request) {
@@ -17,12 +17,10 @@ async function handleRequest(request) {
 }
 
 async function handleIndex(request) {
-  const reports = await Promise.all([
-    fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/deno.json`).then(x => x.json()),
-    fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/node.json`).then(x => x.json()),
-    fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/wasmer.json`).then(x => x.json()),
-    fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/wasmtime.json`).then(x => x.json()),
-  ]);
+  const reports = await Promise.all(
+    ["deno", "node", "wasmer", "wasmtime"]
+      .map(x => fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${x}.json`).then(x => x.json()))
+  );
 
   const summarize = ({ runtime, results }) => {
     const summary = {
@@ -150,10 +148,5 @@ async function handleNotFound(request) {
 }
 
 function escape(unsafe) {
-    return unsafe
-         .replace(/&/g, "&amp;")
-         .replace(/</g, "&lt;")
-         .replace(/>/g, "&gt;")
-         .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
- }
+  return unsafe.replace(/[&<>"']/g, m => `&#${m.charCodeAt(0)};`);
+}
