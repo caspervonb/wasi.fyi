@@ -64,15 +64,6 @@ async function handleView(request) {
   const { pathname } = new URL(request.url);
 
   const report = await fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${pathname}.json`).then(x => x.json());
-
-  const modifiers = (result) => {
-    if (result.status == "PASS") {
-      return "is-success";
-    }
-
-    return "is-failure";
-  };
-
   const view = ({ results }) => {
     return results.map((result) => {
       if (result.status == "PASS") {
@@ -129,22 +120,6 @@ async function handleView(request) {
 async function handleRaw(request) {
   const { pathname } = new URL(request.url);
   return fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${pathname}`);
-}
-
-async function handleNotFound(request) {
-  const html = `
-    <html>
-      <head></head>
-      <body>
-        <h2>Not Found</h2>
-      </body>
-    </html>
-  `;
-
-  return new Response(html, {
-    status: 404,
-    headers: { "content-type": "text/html" },
-  });
 }
 
 function escape(unsafe) {
