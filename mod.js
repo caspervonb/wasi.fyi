@@ -57,7 +57,7 @@ async function handleIndex(request) {
   `;
 
   return new Response(html, {
-    status: 404,
+    status: 200,
     headers: { "content-type": "text/html" },
   });
 }
@@ -123,7 +123,7 @@ async function handleView(request) {
   `;
 
   return new Response(html, {
-    status: 404,
+    status: 200,
     headers: { "content-type": "text/html" },
   });
 }
