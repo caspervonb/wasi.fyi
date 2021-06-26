@@ -51,7 +51,7 @@ async function handleIndex(request) {
           <h1 class="title">WebAssembly System Interface Test Suite Results</h1>
         </header>
 
-        ${reports.map(summarize)}
+        ${reports.map(summarize).join("")}
       </body>
     </html>
   `;
