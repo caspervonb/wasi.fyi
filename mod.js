@@ -26,7 +26,7 @@ async function handleIndex(request) {
       ),
   );
 
-  const summarize = ({ runtime, results }) => {
+  const content = reports.map(({ runtime, results }) => {
     const summary = {
       total: results.length,
       passed: results.filter((x) => x.status == "PASS").length,
@@ -40,23 +40,11 @@ async function handleIndex(request) {
         <a href="${runtime.name}">View more</a>
       </section>
     `;
-  };
+  }).join("");
 
-  const html = `
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-      </head>
-      <body class="container is-max-desktop">
-        <header class="section">
-          <h1 class="title">WebAssembly System Interface Test Suite Results</h1>
-        </header>
-
-        ${reports.map(summarize).join("")}
-      </body>
-    </html>
-  `;
+  const html = layout({
+    content,
+  });
 
   return new Response(html, {
     status: 200,
@@ -66,56 +54,39 @@ async function handleIndex(request) {
 
 async function handleView(request) {
   const { pathname } = new URL(request.url);
-
-  const report = await fetch(
+  const { results } = await fetch(
     `https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${pathname}.json`,
   ).then((x) => x.json());
-  const view = ({ results }) => {
-    return results.map((result) => {
-      if (result.status == "PASS") {
-        return `
+  const content = results.map(({ name, status, message }) => {
+    if (status == "PASS") {
+      return `
         <li class="box">
           <span class="icon-text has-text-success">
             <span class="icon">
               <i class="fas fa-check-square"></i>
             </span>
-            <span>${result.name}</span>
+            <span>${name}</span>
           </span>
         </li>
         `;
-      }
+    }
 
-      return `
+    return `
       <li class="box">
         <span class="icon-text has-text-danger">
           <span class="icon">
             <i class="fas fa-ban"></i>
           </span>
-          <span>${result.name}</span>
+          <span>${name}</span>
         </span>
-        <div><pre class="block">${escape(result.message)}</pre></div>
+        <div><pre class="block">${escape(message)}</pre></div>
       </li>
       `;
-    }).join("\n");
-  };
+  }).join("\n");
 
-  const html = `
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-      </head>
-      <body class="container is-max-desktop">
-        <header class="section">
-          <h1 class="title">WebAssembly System Interface Test Suite Results</h1>
-        </header>
-
-        <ul>${view(report)}</ul>
-      </body>
-    </html>
-
-  `;
+  const html = layout({
+    content,
+  });
 
   return new Response(html, {
     status: 200,
@@ -128,6 +99,24 @@ async function handleRaw(request) {
   return fetch(
     `https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${pathname}`,
   );
+}
+
+function layout({ content }) {
+  return `
+    <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+      </head>
+      <body class="container is-max-desktop">
+        <header class="section">
+          <h1 class="title">WebAssembly System Interface Test Suite Results</h1>
+        </header>
+
+        ${content}
+      </body>
+    </html>
+  `;
 }
 
 function escape(unsafe) {
