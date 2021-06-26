@@ -1,4 +1,4 @@
-addEventListener("fetch", function(event) {
+addEventListener("fetch", function (event) {
   event.respondWith(handleRequest(event.request));
 });
 
@@ -19,13 +19,17 @@ async function handleRequest(request) {
 async function handleIndex(request) {
   const reports = await Promise.all(
     ["deno", "node", "wasmer", "wasmtime"]
-      .map(x => fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${x}.json`).then(x => x.json()))
+      .map((x) =>
+        fetch(
+          `https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${x}.json`,
+        ).then((x) => x.json())
+      ),
   );
 
   const summarize = ({ runtime, results }) => {
     const summary = {
       total: results.length,
-      passed: results.filter(x => x.status == "PASS").length,
+      passed: results.filter((x) => x.status == "PASS").length,
     };
 
     return `
@@ -63,7 +67,9 @@ async function handleIndex(request) {
 async function handleView(request) {
   const { pathname } = new URL(request.url);
 
-  const report = await fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${pathname}.json`).then(x => x.json());
+  const report = await fetch(
+    `https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${pathname}.json`,
+  ).then((x) => x.json());
   const view = ({ results }) => {
     return results.map((result) => {
       if (result.status == "PASS") {
@@ -119,9 +125,11 @@ async function handleView(request) {
 
 async function handleRaw(request) {
   const { pathname } = new URL(request.url);
-  return fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${pathname}`);
+  return fetch(
+    `https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${pathname}`,
+  );
 }
 
 function escape(unsafe) {
-  return unsafe.replace(/[&<>"']/g, m => `&#${m.charCodeAt(0)};`);
+  return unsafe.replace(/[&<>"']/g, (m) => `&#${m.charCodeAt(0)};`);
 }
