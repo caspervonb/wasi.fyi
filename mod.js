@@ -19,6 +19,7 @@ async function handleRequest(request) {
 async function handleIndex(request) {
   const reports = await Promise.all([
     fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/deno.json`).then(x => x.json()),
+    fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/node.json`).then(x => x.json()),
     fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/wasmer.json`).then(x => x.json()),
     fetch(`https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/wasmtime.json`).then(x => x.json()),
   ]);
