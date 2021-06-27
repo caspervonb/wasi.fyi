@@ -33,7 +33,7 @@ async function handleIndex(request) {
     };
 
     return `
-      <section class="section card">
+      <section class="box">
         <p>Ran ${summary.total} tests with ${runtime.name} (v${runtime.version})</p>
         <p>${summary.passed} / ${summary.total} test cases pass.</p>
         <progress class="progress is-small is-success has-background-danger" value="${summary.passed}" max="${summary.total}"></progress>
