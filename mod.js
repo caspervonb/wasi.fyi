@@ -58,28 +58,20 @@ async function handleView(request) {
     `https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${pathname}.json`,
   ).then((x) => x.json());
   const content = results.map(({ name, status, message }) => {
-    if (status == "PASS") {
-      return `
-        <li class="box">
-          <span class="icon-text has-text-success">
-            <span class="icon">
-              <i class="fas fa-check-square"></i>
-            </span>
-            <span>${name}</span>
-          </span>
-        </li>
-        `;
-    }
+    const success = status == "PASS";
+    const content = message && message.length > 0
+      ? `<div><pre class="block">${escape(message)}</pre></div>`
+      : ``;
 
     return `
       <li class="box">
-        <span class="icon-text has-text-danger">
+        <span class="icon-text ${success ? "has-text-success" : "has-text-danger"}">
           <span class="icon">
-            <i class="fas fa-ban"></i>
+            <i class="fas ${success ? "fa-check-square" : "fa-ban"}"></i>
           </span>
           <span>${name}</span>
         </span>
-        <div><pre class="block">${escape(message)}</pre></div>
+        ${content}
       </li>
       `;
   }).join("\n");
