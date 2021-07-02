@@ -1,3 +1,5 @@
+const GITHUB_TOKEN = Deno.env.get("GITHUB_TOKEN");
+
 addEventListener("fetch", function (event) {
   event.respondWith(handleRequest(event.request));
 });
@@ -9,41 +11,59 @@ async function handleRequest(request) {
     return handleIndex(request);
   }
 
-  if (pathname.endsWith(".json")) {
-    return handleRaw(request);
-  }
-
   return handleView(request);
 }
 
 async function handleIndex(request) {
-  const reports = await Promise.all(
-    ["deno", "node", "wasmer", "wasmtime"]
-      .map((x) =>
-        fetch(
-          `https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${x}.json`,
-        ).then((x) => x.json())
-      ),
-  );
+  const commit = await fetch(`https://api.github.com/repos/caspervonb/wasi-test-suite/commits/main`, {
+    headers: {
+      "Authorization": `token ${GITHUB_TOKEN}`,
+      "Accept": "application/vnd.github.v3+json.sha",
+    },
+  }).then(response => response.json());
 
-  const content = reports.map(({ runtime, results }) => {
-    const summary = {
-      total: results.length,
-      passed: results.filter((x) => x.status == "PASS").length,
-    };
+  const directories = await fetch(`https://api.github.com/repos/caspervonb/wasi-test-data/contents/${commit.sha}`, {
+    headers: {
+      "Authorization": `token ${GITHUB_TOKEN}`,
+      "Accept": "application/vnd.github.v3+json",
+    },
+  }).then(response => response.json());
 
-    return `
+  const entries = await Promise.all(directories.map(async directory => {
+    return await fetch(`https://api.github.com/repos/caspervonb/wasi-test-data/contents/${directory.path}`, {
+      headers: {
+        "Authorization": `token ${GITHUB_TOKEN}`,
+        "Accept": "application/vnd.github.v3+json",
+      },
+    }).then(response => response.json());
+  })).then(results => results.flat());
+
+  const files = await Promise.all(entries.map((entry) => {
+    return fetch(`https://api.github.com/repos/caspervonb/wasi-test-data/contents/${entry.path}`, {
+      headers: {
+        "Authorization": `token ${GITHUB_TOKEN}`,
+        "Accept": "application/vnd.github.v3.raw",
+      },
+    }).then(response => response.json());
+  }));
+
+  const html = layout({
+    content: files.map(({ runtime, results, entry }, index) => {
+      const path = entries[index].path.slice(0, -5);
+      const summary = {
+        total: results.length,
+        passed: results.filter((x) => x.status == "PASS").length,
+      };
+
+      return `
       <section class="box">
         <p>Ran ${summary.total} tests with ${runtime.name} (v${runtime.version})</p>
         <p>${summary.passed} / ${summary.total} test cases pass.</p>
         <progress class="progress is-small is-success has-background-danger" value="${summary.passed}" max="${summary.total}"></progress>
-        <a href="${runtime.name}">View more</a>
+        <a href="/${path}">View more</a>
       </section>
     `;
-  }).join("");
-
-  const html = layout({
-    content,
+    }).join(""),
   });
 
   return new Response(html, {
@@ -54,10 +74,16 @@ async function handleIndex(request) {
 
 async function handleView(request) {
   const { pathname } = new URL(request.url);
-  const { results } = await fetch(
-    `https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${pathname}.json`,
-  ).then((x) => x.json());
-  const content = results.map(({ name, status, message }) => {
+  const path = `${pathname.slice(1)}.json`;
+
+  const { results } = await fetch(`https://api.github.com/repos/caspervonb/wasi-test-data/contents/${path}`, {
+    headers: {
+      "Authorization": `token ${GITHUB_TOKEN}`,
+      "Accept": "application/vnd.github.v3.raw",
+    },
+  }).then(response => response.json());
+
+  const content = results.map(({ path, status, message }) => {
     const success = status == "PASS";
     const content = message && message.length > 0
       ? `<div><pre class="block">${escape(message)}</pre></div>`
@@ -69,7 +95,7 @@ async function handleView(request) {
           <span class="icon">
             <i class="fas ${success ? "fa-check-square" : "fa-ban"}"></i>
           </span>
-          <span>${name}</span>
+          <span>${path}</span>
         </span>
         ${content}
       </li>
@@ -84,13 +110,6 @@ async function handleView(request) {
     status: 200,
     headers: { "content-type": "text/html" },
   });
-}
-
-async function handleRaw(request) {
-  const { pathname } = new URL(request.url);
-  return fetch(
-    `https://raw.githubusercontent.com/caspervonb/wasi-test-results/main/${pathname}`,
-  );
 }
 
 function layout({ content }) {
