@@ -29,14 +29,14 @@ async function handleIndex(request) {
     },
   }).then(response => response.json());
 
-  const entries = await Promise.all(directories.map(async directory => {
-    return await fetch(`https://api.github.com/repos/caspervonb/wasi-test-data/contents/${directory.path}`, {
+  const entries = await Promise.all(directories.map(directory => {
+    return fetch(`https://api.github.com/repos/caspervonb/wasi-test-data/contents/${directory.path}`, {
       headers: {
         "Authorization": `token ${GITHUB_TOKEN}`,
         "Accept": "application/vnd.github.v3+json",
       },
     }).then(response => response.json());
-  })).then(results => results.flat());
+  })).then(entries => entries.map(entries => entries[entries.length - 1]));
 
   const files = await Promise.all(entries.map((entry) => {
     return fetch(`https://api.github.com/repos/caspervonb/wasi-test-data/contents/${entry.path}`, {
