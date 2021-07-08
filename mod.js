@@ -38,6 +38,8 @@ async function handleIndex(request) {
     }).then(response => response.json());
   })).then(entries => entries.map(entries => entries[entries.length - 1]));
 
+  entries.sort((a, b) => a.path.localeCompare(b.path));
+
   const files = await Promise.all(entries.map((entry) => {
     return fetch(`https://api.github.com/repos/caspervonb/wasi-test-data/contents/${entry.path}`, {
       headers: {
