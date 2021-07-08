@@ -83,6 +83,8 @@ async function handleView(request) {
     },
   }).then(response => response.json());
 
+  results.sort((a, b) => a.path.localeCompare(b.path));
+
   const content = results.map(({ path, status, message }) => {
     const success = status == "PASS";
     const content = message && message.length > 0
