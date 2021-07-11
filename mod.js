@@ -52,10 +52,7 @@ async function handleIndex(request) {
   const html = layout({
     content: files.map(({ runtime, results, entry }, index) => {
       const path = entries[index].path.slice(0, -5);
-      const summary = {
-        total: results.length,
-        passed: results.filter((x) => x.status == "PASS").length,
-      };
+      const summary = summarize(results);
 
       return `
       <section class="container">
@@ -88,10 +85,12 @@ async function handleView(request) {
   results.sort((a, b) => a.path.localeCompare(b.path));
 
   const [sha, runtime, version] = path.slice(0, -5).split("/", 3);
+  const summary = summarize(results);
 
   const content = [
     `<main class="container">`,
     `<p>Showing test results for <strong>${runtime}</strong> version <strong>${version}</strong> against commit <a href="https://github.com/caspervonb/wasi-test-suite/commit/${sha}">${sha}</a></p>`,
+    `<p><strong>${summary.passed} out of ${summary.total}</strong> tests passed.</p>`,
     `<table>`,
     `<thead>`,
     `  <td>Path</td>`,
@@ -193,6 +192,18 @@ function layout({ content }) {
       </body>
     </html>
   `;
+}
+
+function summarize(results) {
+  const total = results.length;
+  const passed = results.filter(x => x.status == "PASS").length;
+  const failed = results.filter(x => x.status == "FAIL").length;
+
+  return {
+    total,
+    passed,
+    failed,
+  };
 }
 
 function escape(unsafe) {
