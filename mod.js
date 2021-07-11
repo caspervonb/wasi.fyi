@@ -87,7 +87,7 @@ async function handleView(request) {
 
   results.sort((a, b) => a.path.localeCompare(b.path));
 
-  const table = [
+  const content = [
     `<table class="container">`,
     `<thead>`,
     `  <td>Path</td>`,
@@ -115,10 +115,6 @@ async function handleView(request) {
     }).join("\n"),
     `</table>`,
   ].join("\n");
-
-  const content = `
-    ${table}
-  `;
 
   const html = layout({
     content,
