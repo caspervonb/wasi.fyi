@@ -187,6 +187,9 @@ function layout({ content }) {
         </nav>
 
         ${content}
+        <footer class="container">
+          <small> Powered by <a href ="https://deno.com/deploy">Deno Deploy</a><small>
+        </footer>
       </body>
     </html>
   `;
