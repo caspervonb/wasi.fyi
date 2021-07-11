@@ -58,11 +58,11 @@ async function handleIndex(request) {
       };
 
       return `
-      <section class="box">
+      <section class="container">
         <p>Ran <strong>${summary.total}</strong> tests with <strong>${runtime.name} v${runtime.version}</strong></p>
         <p><strong>${summary.passed} / ${summary.total}</strong> tests pass.</p>
-        <progress class="progress is-small is-success has-background-danger" value="${summary.passed}" max="${summary.total}"></progress>
-        <a href="/${path}">View more</a>
+        <progress class="summary" value="${summary.passed}" max="${summary.total}"></progress>
+        <a href="/${path}">View results</a>
       </section>
     `;
     }).join(""),
@@ -87,24 +87,38 @@ async function handleView(request) {
 
   results.sort((a, b) => a.path.localeCompare(b.path));
 
-  const content = results.map(({ path, status, message }) => {
-    const success = status == "PASS";
-    const content = message && message.length > 0
-      ? `<div><pre class="block">${escape(message)}</pre></div>`
-      : ``;
+  const table = [
+    `<table class="container">`,
+    `<thead>`,
+    `  <td>Path</td>`,
+    `  <td>Status</td>`,
+    `</thead>`,
 
-    return `
-      <li class="box">
-        <span class="icon-text ${success ? "has-text-success" : "has-text-danger"}">
-          <span class="icon">
-            <i class="fas ${success ? "fa-check-square" : "fa-ban"}"></i>
-          </span>
-          <span>${path}</span>
-        </span>
-        ${content}
-      </li>
+    results.map(({ path, status, message }) => {
+      if (message.length > 0) {
+        const details = `<pre>${message}</pre>`;
+
+        return `
+        <tr class="${status.toLowerCase()}">
+          <td>${path}</td>
+          <td><details><summary>${status}</summary>${details}</details></td>
+        </tr>
+        `;
+      }
+
+      return `
+        <tr class="${status.toLowerCase()}">
+          <td>${path}</td>
+          <td>${status}</td>
+        </tr>
       `;
-  }).join("\n");
+    }).join("\n"),
+    `</table>`,
+  ].join("\n");
+
+  const content = `
+    ${table}
+  `;
 
   const html = layout({
     content,
@@ -121,13 +135,27 @@ function layout({ content }) {
     <html>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+        <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+        <style>
+          td details {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+          }
+
+          tr.pass td {
+            color: var(--valid);
+          }
+
+          tr.fail td {
+            color: var(--invalid);
+          }
+        </style>
       </head>
-      <body class="container is-max-desktop">
-        <header class="section">
+      <body>
+        <nav class="container">
           <h1 class="title">WebAssembly System Interface Test Suite Results</h1>
-        </header>
+        </nav>
 
         ${content}
       </body>
