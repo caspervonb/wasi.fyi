@@ -87,8 +87,12 @@ async function handleView(request) {
 
   results.sort((a, b) => a.path.localeCompare(b.path));
 
+  const [sha, runtime, version] = path.slice(0, -5).split("/", 3);
+
   const content = [
-    `<table class="container">`,
+    `<main class="container">`,
+    `<p>Showing test results for <strong>${runtime}</strong> version <strong>${version}</strong> against commit <a href="https://github.com/caspervonb/wasi-test-suite/commit/${sha}">${sha}</a></p>`,
+    `<table>`,
     `<thead>`,
     `  <td>Path</td>`,
     `  <td>Status</td>`,
@@ -114,6 +118,7 @@ async function handleView(request) {
       `;
     }).join("\n"),
     `</table>`,
+    `</main>`,
   ].join("\n");
 
   const html = layout({
