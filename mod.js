@@ -59,7 +59,7 @@ async function handleIndex(request) {
 
       return `
       <section class="container">
-        <p>Ran <strong>${summary.total}</strong> tests with <strong>${runtime.name} v${runtime.version}</strong></p>
+        <p>Ran <strong>${summary.total}</strong> tests with <strong>${runtime.name} version ${runtime.version}</strong></p>
         <p><strong>${summary.passed} / ${summary.total}</strong> tests pass.</p>
         <progress class="summary" value="${summary.passed}" max="${summary.total}"></progress>
         <a href="/${path}">View results</a>
