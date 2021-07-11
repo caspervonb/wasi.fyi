@@ -172,6 +172,16 @@ function layout({ content }) {
           tr.fail td {
             color: var(--fail);
           }
+
+          progress.summary[value]::-webkit-progress-bar {
+            -webkit-appearance: none;
+            background-color: var(--fail);
+          }
+
+          progress.summary[value]::-webkit-progress-value {
+            -webkit-appearance: none;
+            background-color: var(--pass);
+          }
         </style>
       </head>
       <body>
