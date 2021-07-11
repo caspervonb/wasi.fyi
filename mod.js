@@ -49,20 +49,26 @@ async function handleIndex(request) {
     }).then(response => response.json());
   }));
 
-  const html = layout({
-    content: files.map(({ runtime, results, entry }, index) => {
+  const content = [
+    `<main class="container">`,
+    files.map(({ runtime, results, entry }, index) => {
       const path = entries[index].path.slice(0, -5);
       const summary = summarize(results);
 
       return `
-      <section class="container">
-        <p>Ran <strong>${summary.total}</strong> tests with <strong>${runtime.name} version ${runtime.version}</strong></p>
-        <p><strong>${summary.passed} / ${summary.total}</strong> tests pass.</p>
-        <progress class="summary" value="${summary.passed}" max="${summary.total}"></progress>
-        <a href="/${path}">View results</a>
-      </section>
-    `;
-    }).join(""),
+        <section class="container">
+          <p>Ran <strong>${summary.total}</strong> tests with <strong>${runtime.name} version ${runtime.version}</strong></p>
+          <p><strong>${summary.passed} / ${summary.total}</strong> tests pass.</p>
+          <progress class="summary" value="${summary.passed}" max="${summary.total}"></progress>
+          <a href="/${path}">View results</a>
+        </section>
+      `;
+    }).join("\n"),
+    `</main>`,
+  ].join("\n");
+
+  const html = layout({
+    content,
   });
 
   return new Response(html, {
