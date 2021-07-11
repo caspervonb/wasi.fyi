@@ -148,6 +148,13 @@ function layout({ content }) {
             --invalid: #943838;
           }
 
+          @media only screen and (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+              --pass: #1f7a5c;
+              --fail: #943838;
+            }
+          }
+
           td details {
             border-bottom: none;
             margin-bottom: 0;
