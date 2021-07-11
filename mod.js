@@ -135,20 +135,35 @@ function layout({ content }) {
     <html>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
         <style>
+          @import "https://unpkg.com/@picocss/pico@latest/css/pico.min.css";
+
+          [data-theme="light"], :root:not([data-theme="dark"]) {
+            --pass: #288a6a;
+            --fail: #b94646;
+          }
+
+          [data-theme="dark"] {
+            --valid: #1f7a5c;
+            --invalid: #943838;
+          }
+
           td details {
             border-bottom: none;
             margin-bottom: 0;
             padding-bottom: 0;
           }
 
+          td details summary {
+            color: inherit;
+          }
+
           tr.pass td {
-            color: var(--valid);
+            color: var(--pass);
           }
 
           tr.fail td {
-            color: var(--invalid);
+            color: var(--fail);
           }
         </style>
       </head>
