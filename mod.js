@@ -176,7 +176,13 @@ function layout({ content }) {
       </head>
       <body>
         <nav class="container">
-          <h1 class="title">WebAssembly System Interface Test Suite Results</h1>
+          <ul>
+            <li><a href="/" class="secondary"><strong>WASI.FYI</strong></a></li>
+          </ul>
+
+          <ul>
+            <li><a href="https://github.com/sponsors/caspervonb" class="secondary">Sponsor</a></li>
+          </ul>
         </nav>
 
         ${content}
