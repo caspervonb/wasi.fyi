@@ -14,7 +14,7 @@ function handleRequest(request) {
   return handleView(request);
 }
 
-async function handleIndex(request) {
+async function handleIndex(_request) {
   const commit = await fetch(
     `https://api.github.com/repos/caspervonb/wasi-test-suite/commits/main`,
     {
@@ -63,7 +63,7 @@ async function handleIndex(request) {
 
   const content = [
     `<main class="container">`,
-    files.map(({ runtime, results, entry }, index) => {
+    files.map(({ runtime, results }, index) => {
       const path = entries[index].path.slice(0, -5);
       const summary = summarize(results);
 
