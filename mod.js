@@ -120,7 +120,7 @@ async function handleView(request) {
 
     results.map(({ path, status, message }) => {
       if (message.length > 0) {
-        const details = `<pre>${message}</pre>`;
+        const details = `<pre>${escape(message)}</pre>`;
 
         return `
         <tr class="${status.toLowerCase()}">
