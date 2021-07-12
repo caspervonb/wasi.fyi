@@ -15,38 +15,50 @@ function handleRequest(request) {
 }
 
 async function handleIndex(request) {
-  const commit = await fetch(`https://api.github.com/repos/caspervonb/wasi-test-suite/commits/main`, {
-    headers: {
-      "Authorization": `token ${GITHUB_TOKEN}`,
-      "Accept": "application/vnd.github.v3+json.sha",
+  const commit = await fetch(
+    `https://api.github.com/repos/caspervonb/wasi-test-suite/commits/main`,
+    {
+      headers: {
+        "Authorization": `token ${GITHUB_TOKEN}`,
+        "Accept": "application/vnd.github.v3+json.sha",
+      },
     },
-  }).then(response => response.json());
+  ).then((response) => response.json());
 
-  const directories = await fetch(`https://api.github.com/repos/caspervonb/wasi-test-data/contents/${commit.sha}`, {
-    headers: {
-      "Authorization": `token ${GITHUB_TOKEN}`,
-      "Accept": "application/vnd.github.v3+json",
-    },
-  }).then(response => response.json());
-
-  const entries = await Promise.all(directories.map(directory => {
-    return fetch(`https://api.github.com/repos/caspervonb/wasi-test-data/contents/${directory.path}`, {
+  const directories = await fetch(
+    `https://api.github.com/repos/caspervonb/wasi-test-data/contents/${commit.sha}`,
+    {
       headers: {
         "Authorization": `token ${GITHUB_TOKEN}`,
         "Accept": "application/vnd.github.v3+json",
       },
-    }).then(response => response.json());
-  })).then(entries => entries.map(entries => entries[entries.length - 1]));
+    },
+  ).then((response) => response.json());
+
+  const entries = await Promise.all(directories.map((directory) => {
+    return fetch(
+      `https://api.github.com/repos/caspervonb/wasi-test-data/contents/${directory.path}`,
+      {
+        headers: {
+          "Authorization": `token ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github.v3+json",
+        },
+      },
+    ).then((response) => response.json());
+  })).then((entries) => entries.map((entries) => entries[entries.length - 1]));
 
   entries.sort((a, b) => a.path.localeCompare(b.path));
 
   const files = await Promise.all(entries.map((entry) => {
-    return fetch(`https://api.github.com/repos/caspervonb/wasi-test-data/contents/${entry.path}`, {
-      headers: {
-        "Authorization": `token ${GITHUB_TOKEN}`,
-        "Accept": "application/vnd.github.v3.raw",
+    return fetch(
+      `https://api.github.com/repos/caspervonb/wasi-test-data/contents/${entry.path}`,
+      {
+        headers: {
+          "Authorization": `token ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github.v3.raw",
+        },
       },
-    }).then(response => response.json());
+    ).then((response) => response.json());
   }));
 
   const content = [
@@ -81,12 +93,15 @@ async function handleView(request) {
   const { pathname } = new URL(request.url);
   const path = `${pathname.slice(1)}.json`;
 
-  const { results } = await fetch(`https://api.github.com/repos/caspervonb/wasi-test-data/contents/${path}`, {
-    headers: {
-      "Authorization": `token ${GITHUB_TOKEN}`,
-      "Accept": "application/vnd.github.v3.raw",
+  const { results } = await fetch(
+    `https://api.github.com/repos/caspervonb/wasi-test-data/contents/${path}`,
+    {
+      headers: {
+        "Authorization": `token ${GITHUB_TOKEN}`,
+        "Accept": "application/vnd.github.v3.raw",
+      },
     },
-  }).then(response => response.json());
+  ).then((response) => response.json());
 
   results.sort((a, b) => a.path.localeCompare(b.path));
 
@@ -212,8 +227,8 @@ function layout({ content }) {
 
 function summarize(results) {
   const total = results.length;
-  const passed = results.filter(x => x.status == "PASS").length;
-  const failed = results.filter(x => x.status == "FAIL").length;
+  const passed = results.filter((x) => x.status == "PASS").length;
+  const failed = results.filter((x) => x.status == "FAIL").length;
 
   return {
     total,
