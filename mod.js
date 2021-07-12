@@ -4,7 +4,7 @@ addEventListener("fetch", function (event) {
   event.respondWith(handleRequest(event.request));
 });
 
-async function handleRequest(request) {
+function handleRequest(request) {
   const { pathname } = new URL(request.url);
 
   if (pathname == "/") {
