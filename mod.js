@@ -212,6 +212,7 @@ function layout({ content }) {
           </ul>
 
           <ul>
+            <li><a href="https://github.com/caspervonb/wasi.fyi" class="secondary">Repository</a></li>
             <li><a href="https://github.com/sponsors/caspervonb" class="secondary">Sponsor</a></li>
           </ul>
         </nav>
